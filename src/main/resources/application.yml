@@ -1,0 +1,57 @@
+server:
+  port: 8080
+
+# API Docs
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /api-ui.html
+
+spring:
+  application:
+    name: Simple App
+  # Data Base Connection Details
+  datasource:
+    url: jdbc:postgresql://localhost:5432/my-db
+    username: my-user
+    password: my-password
+  jpa:
+    show-sql: false
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          lob:
+            non_contextual_creation: true
+
+
+# API Connection Details
+weather:
+  api:
+    appId: my-app-id
+    baseUrl: http://api.openweathermap.org
+    path: /data/2.5/weather?APPID=${weather.api.appId}
+
+
+# Feign Configuration
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 5000
+        loggerLevel: basic
+      WeatherClient:
+        errorDecoder: simple.app.api.decoder.WeatherErrorDecoder
+
+
+# Log Level
+logging:
+  level:
+    com:
+      assignment:
+        spring: INFO
+    org:
+      hibernate: ERROR
+
