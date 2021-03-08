@@ -1,17 +1,14 @@
 package simple.app.exception;
 
 import lombok.Getter;
-import org.springframework.http.HttpStatus;
+import simple.app.error.KeyError;
 
 @Getter
 public class WeatherException extends RuntimeException {
 
-    private final HttpStatus statusCode;
-    private final String code;
+    private final KeyError keyError;
 
-    public WeatherException(HttpStatus statusCode, String code, String message) {
-        super(message);
-        this.statusCode = statusCode;
-        this.code = code;
+    public WeatherException(KeyError keyError) {
+        this.keyError = keyError;
     }
 }

@@ -6,9 +6,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
+import simple.app.config.MessageSourceConfig;
 import simple.app.exception.handler.WeatherErrorHandler;
+import simple.app.message.GenericMessageReader;
 import simple.app.service.WeatherService;
 
 import static org.mockito.Mockito.verify;
@@ -18,14 +21,14 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standal
 
 @ExtendWith(SpringExtension.class)
 @WebMvcTest(WeatherController.class)
-//@ContextConfiguration(classes = WeatherErrorMapper.class)
+@ContextConfiguration(classes = {GenericMessageReader.class, MessageSourceConfig.class})
 class WeatherControllerTest {
 
     @MockBean
     private WeatherService weatherService;
 
-    //@Autowired
-    //private WeatherErrorMapper errorMapper;
+    @Autowired
+    private GenericMessageReader messageReader;
 
     @Autowired
     private MockMvc mockMvc;
@@ -33,7 +36,7 @@ class WeatherControllerTest {
     @BeforeEach
     void setMockMvc() {
         this.mockMvc = standaloneSetup(new WeatherController(weatherService))
-                .setControllerAdvice(new WeatherErrorHandler())
+                .setControllerAdvice(new WeatherErrorHandler(messageReader))
                 .build();
     }
 

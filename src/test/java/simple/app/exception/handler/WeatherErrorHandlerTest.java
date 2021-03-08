@@ -10,21 +10,23 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import simple.app.config.MessageSourceConfig;
 import simple.app.controller.WeatherController;
+import simple.app.error.KeyError;
 import simple.app.exception.WeatherException;
-import simple.app.mapper.WeatherErrorMapper;
+import simple.app.message.GenericMessageReader;
 import simple.app.model.WeatherError;
 import simple.app.service.WeatherService;
 
 import java.io.UnsupportedEncodingException;
 
 import static java.util.Collections.emptyMap;
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.equalToObject;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
@@ -34,14 +36,14 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standal
 
 @ExtendWith(SpringExtension.class)
 @WebMvcTest(WeatherController.class)
-@ContextConfiguration(classes = WeatherErrorMapper.class)
+@ContextConfiguration(classes = {GenericMessageReader.class, MessageSourceConfig.class})
 class WeatherErrorHandlerTest {
 
     @MockBean
     private WeatherService weatherService;
 
-    //@Autowired
-    //private WeatherErrorMapper errorMapper;
+    @Autowired
+    private GenericMessageReader messageReader;
 
     @Autowired
     private MockMvc mockMvc;
@@ -51,19 +53,19 @@ class WeatherErrorHandlerTest {
     @BeforeEach
     void setMockMvc() {
         this.mockMvc = standaloneSetup(new WeatherController(weatherService))
-                .setControllerAdvice(new WeatherErrorHandler())
+                .setControllerAdvice(new WeatherErrorHandler(messageReader))
                 .build();
     }
 
     @Test
     void errorHandler_handleWeatherException_status401WithCustomErrorCode() throws Exception {
-        when(weatherService.getWeather("some_city")).thenThrow(new WeatherException(HttpStatus.UNAUTHORIZED, "some_code", "some_message"));
+        when(weatherService.getWeather("some_city")).thenThrow(new WeatherException(KeyError.API_WEATHER_KEY));
         WeatherError error = getWeatherError(mockMvc.perform(get("/weather")
                 .param("city", "some_city"))
                 .andExpect(status().isUnauthorized())
                 .andReturn());
         verify(weatherService).getWeather("some_city");
-        assertThat(error, is(equalToObject(WeatherError.builder().code("some_code").message("some_message").build())));
+        assertThat(error, is(equalToObject(weatherError("W0002", "some_error_message_002"))));
     }
 
     @Test
@@ -74,7 +76,7 @@ class WeatherErrorHandlerTest {
                 .andExpect(status().isInternalServerError())
                 .andReturn());
         verify(weatherService).getWeather("some_city");
-        assertThat(error, is(equalToObject(WeatherError.builder().code("W0006").message("Unknown error while calling the API. Please contact the administrator.").build())));
+        assertThat(error, is(equalToObject(weatherError("W0006", "some_error_message_006"))));
     }
 
     @Test
@@ -84,7 +86,7 @@ class WeatherErrorHandlerTest {
                 .andExpect(status().isBadRequest())
                 .andReturn());
         verify(weatherService, never()).getWeather(anyString());
-        assertThat(error.getCode(), is(equalTo("W0004")));
+        assertThat(error, is(equalToObject(weatherError("W0004", "some_error_message_004"))));
     }
 
     @Test
@@ -95,10 +97,14 @@ class WeatherErrorHandlerTest {
                 .andExpect(status().isInternalServerError())
                 .andReturn());
         verify(weatherService).getWeather("some_city");
-        assertThat(error, is(equalToObject(WeatherError.builder().code("W0001").message("some_unhandled_exception_message").build())));
+        assertThat(error, is(equalToObject(weatherError("W0001", "some_error_message_001"))));
     }
 
     private WeatherError getWeatherError(MvcResult mvcResult) throws UnsupportedEncodingException, JsonProcessingException {
         return new ObjectMapper().readValue(mvcResult.getResponse().getContentAsString(), WeatherError.class);
+    }
+
+    private WeatherError weatherError(String code, String message) {
+        return WeatherError.builder().code(code).message(message).build();
     }
 }
