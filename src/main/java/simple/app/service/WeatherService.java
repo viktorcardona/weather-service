@@ -18,13 +18,14 @@ public class WeatherService {
 
     private final WeatherClient client;
     private final WeatherRepository repository;
+    private final WeatherDataMapper weatherDataMapper;
 
     public WeatherData getWeather(String city) {
         log.debug("Get weather service was invoked...");
         WeatherResponse response = client.getWeather(city);
         WeatherEntity entity = WeatherEntityMapper.INSTANCE.map(response);
         repository.save(entity);
-        return WeatherDataMapper.INSTANCE.map(entity);
+        return weatherDataMapper.map(entity);
     }
 
 }

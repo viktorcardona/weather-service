@@ -10,6 +10,7 @@ import simple.app.api.model.Main;
 import simple.app.api.model.Sys;
 import simple.app.api.model.WeatherResponse;
 import simple.app.entity.WeatherEntity;
+import simple.app.mapper.WeatherDataMapper;
 import simple.app.model.WeatherData;
 import simple.app.repository.WeatherRepository;
 
@@ -30,21 +31,29 @@ class WeatherServiceTest {
     @Mock
     private WeatherRepository repository;
 
+    @Mock
+    private WeatherDataMapper weatherDataMapper;
+
     @Test
     void getWeather_givenCity_callAPIAndSaveEntity() {
+
+        WeatherEntity entity = WeatherEntity.builder().city("some_city").country("some_country").temperature(2d).build();
+        WeatherEntity persistedEntity = WeatherEntity.builder().id(88).city("some_city").country("some_country").temperature(2d).build();
+        WeatherData expected = WeatherData.builder().id(88).city("some_city").country("some_country").temperature(2d).build();
 
         when(client.getWeather("some_city")).thenReturn(getWeatherResponse());
         doAnswer(invocation -> {
             ((WeatherEntity)invocation.getArguments()[0]).setId(88);
             return null;
-        }).when(repository).save(WeatherEntity.builder().city("some_city").country("some_country").temperature(2d).build());
+        }).when(repository).save(entity);
+        when(weatherDataMapper.map(persistedEntity)).thenReturn(expected);
 
         WeatherData result = subject.getWeather("some_city");
-        WeatherData expected = WeatherData.builder().id(88).city("some_city").country("some_country").temperature(2d).build();
 
         assertThat(result, is(equalToObject(expected)));
         verify(client).getWeather("some_city");
-        verify(repository).save(WeatherEntity.builder().id(88).city("some_city").country("some_country").temperature(2d).build());
+        verify(repository).save(persistedEntity);
+        verify(weatherDataMapper).map(persistedEntity);
     }
 
     private WeatherResponse getWeatherResponse() {
