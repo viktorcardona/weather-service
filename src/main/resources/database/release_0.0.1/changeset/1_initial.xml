@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="release_0.0.1_1" author="Victor">
+        <comment>Weather table</comment>
+        <sqlFile path="database/release_0.0.1/rollout/1_initial.sql"/>
+        <rollback>
+            <sqlFile path="database/release_0.0.1/rollback/1_initial.sql"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

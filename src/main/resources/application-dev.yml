@@ -1,0 +1,13 @@
+#override some properties for dev/testing purposes
+spring:
+  datasource:
+    url: jdbc:h2:file:/FULL_PATH/weather-service/data/db/simple-weather-db;MODE=MSSQLServer;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: none
+## spring.jpa.hibernate.ddl-auto
+##    - this prevents hibernate to recreate the tables when enabling h2 database every time the app starts or shutdown

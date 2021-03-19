@@ -11,14 +11,17 @@ springdoc:
 spring:
   application:
     name: Simple App
+  liquibase:
+    enabled: false
+    change-log: classpath:/database/changelog-master.xml
   # Data Base Connection Details
   datasource:
-    url: jdbc:postgresql://localhost:5432/my-db
-    username: my-user
-    password: my-password
+    url: jdbc:postgresql://localhost:5432/weather-db
+    username: postgres
+    password: mysecretpassword
+    driver-class-name: org.postgresql.Driver
+    platform: postgres
   jpa:
-    show-sql: false
-    open-in-view: false
     properties:
       hibernate:
         jdbc:
