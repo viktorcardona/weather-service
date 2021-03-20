@@ -1,0 +1,10 @@
+spring:
+  # Data Base Connection Details
+  # weather-postgres is the docker container name of postgres
+  # This file profile is reference in the Dockerfile
+  datasource:
+    url: jdbc:postgresql://weather-postgres:5432/weather-db
+    username: postgres
+    password: mysecretpassword
+    driver-class-name: org.postgresql.Driver
+    platform: postgres

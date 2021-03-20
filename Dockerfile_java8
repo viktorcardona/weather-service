@@ -1,0 +1,11 @@
+# This docker file works when we need to use java 8 to run the app
+# Base image
+FROM openjdk:8-jre-alpine
+
+ARG JAR_FILE
+ADD target/${JAR_FILE} service.jar
+EXPOSE 8080
+ENTRYPOINT ["java", \
+            "-Dspring.profiles.active=live", \
+            "-jar", \
+            "service.jar"]
