@@ -1,0 +1,26 @@
+version: '2'
+
+services:
+  weather-service:
+    image: 'simple-app-weather:latest'
+    build:
+      context: .
+    container_name: weather-service
+    restart: always
+    depends_on:
+      - weather-postgres
+    ports:
+      - 8082:8080
+
+  weather-postgres:
+    image: 'postgres:latest'
+    container_name: weather-postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=mysecretpassword
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    ports:
+      - 5432:5432
+    volumes:
+      - /Users/my-user/dockerdata/postgres:/var/lib/postgresql/data
+    restart: always

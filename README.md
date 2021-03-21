@@ -147,6 +147,16 @@ This is a simple weather service that requests weather data given a city name.
         
         The app runs with the prod profile. It uses the application-prod.yml file.
         The server-ip of the database contains the name of the docker container of postgres which is weather-postgres
+        
+### Docker Compose
+
+With a single file docker-compose.yml configuration we manage 2 docker containers.
+Configure the absolute path to store the postgres data files, changed as needed:
+/Users/my-user/dockerdata/postgres
+
+-   1.  Run the app:
+        docker-compose up
+
 
 ### Test the Application
 
